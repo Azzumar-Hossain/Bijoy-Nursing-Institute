@@ -29,13 +29,27 @@ class AuthController extends StateNotifier<AsyncValue<StudentProfile?>> {
           final profile = StudentProfile.fromJson(profileJson);
           state = AsyncValue.data(profile);
         } else {
-          state = AsyncValue.error(jsonData['message'], StackTrace.current);
+          // Show user-friendly message for API-level errors
+          final errorMessage = jsonData['message'] ?? 'Login failed';
+          state = AsyncValue.error(errorMessage, StackTrace.current);
         }
       } else {
+        // Show generic server error message to user
         state = AsyncValue.error("Server error", StackTrace.current);
       }
     } catch (e) {
-      state = AsyncValue.error("Network error: $e", StackTrace.current);
+      // Show generic network error message to user
+      state = AsyncValue.error("Network error", StackTrace.current);
+
+      // For debugging purposes, you can print the actual error
+      print('Network error details: $e');
+    }
+  }
+
+  // Optional: Add a method to clear error state
+  void clearError() {
+    if (state.hasError) {
+      state = const AsyncValue.data(null);
     }
   }
 }
